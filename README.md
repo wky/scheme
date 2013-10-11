@@ -1,8 +1,39 @@
+#10月10日讨论总结-预处理
 
-#9月29日讨论总结-Scheme
+###预处理用scheme语言实现, 用scheme.com的解释器  Petite Chez Scheme
 
-###preprocessing阶段
-	待确认
+###输出是scheme源代码
+
+###1. 遇到内置函数/其他标示符-> 直接输出
+
+###2. 遇到define-syntax
+
+####记录name和keywords。对于一组pattern->output,
+pattern: 都是递归的结构
+
+1. list
+2. improper list
+3. list ... -> 记录前后确定的元素个数
+4. improper list ... ->去掉最后一个cdr, 转化成3
+5. 其他报错
+
+###3. 遇到宏的名字-> 递归地以其出现的block粒度进行匹配展开，直到不能继续展开
+
+1. 符号表中识别出宏
+2. 尝试每一组pattern->output,
+    1. 递归地往标号里填充内容，其他按字面匹配
+    2. 对于output
+        1. 非变量->直接输出
+        2. 变量->查变量表，在递归的最里层输出值
+        3. 如果出错，直接抛出错误      
+3. 将错如写入另一文件
+
+
+###（define-syntax name (keyword ...) ((_ . pattern) output)...）
+
+
+
+#9月29日讨论总结-runtime
 
 ###bytecode generator 需要处理的语法结构
 1. `lambda`, `quote`
@@ -60,6 +91,3 @@
 2. 内嵌`procedure`被捕获后，如果在外部被调用，对于内嵌`procedure`的父`procedure`中的局部变量引用，如何处理？
 	* 待wky在各个实现上测试
 
-
-###其他
-####其他问题也请一并提出，可以在issue中提出
