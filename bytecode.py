@@ -342,7 +342,7 @@ class NativeProc:
       pass
       ####
   def __str__(self):
-    return str(symbol)
+    return str(self.symbol)
 
 ## Global Variable Defines
 

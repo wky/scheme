@@ -166,7 +166,7 @@ def gen_atom(token): # atom
   elif isinstance(token, Symbol):
     if token in Global.native_proc:
       Global.add_const_table(NativeProc(token))
-      bytecode = [PUSH, GLOBAL, Global.find_const_table(token)]
+      bytecode = [PUSH, GLOBAL, len(Global.const_table)-1]
     else:
       rank, index = Global.find_symbol(token)
       if rank is None or index is None:
