@@ -10,6 +10,7 @@
 (define (man-or-boy n)
 	(display (A n (lambda () 1) (lambda () -1) (lambda () -1) (lambda () 1) (lambda () 0))))
 
+
 (display "Show me -67 if you are a MAN:")
 (man-or-boy 10)
 
