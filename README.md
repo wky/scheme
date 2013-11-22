@@ -129,9 +129,9 @@ pattern: 都是递归的结构
 	* `set (from) (to)` 用于`define`和`set!` 
 
 
-###未解决的问题
+###已经解决的问题
 1. `call/cc`是否原封不动的保持状态？在捕获`current continuation`之后，如果局部变量被修改，再次跳回去时，该局部变量是什么状态？
-    * 待wky在各个实现上测试
+    * 该变量被修改。见large_test.scm中66-76行
 2. 内嵌`procedure`被捕获后，如果在外部被调用，对于内嵌`procedure`的父`procedure`中的局部变量引用，如何处理？
-	* 待wky在各个实现上测试
+	* 见man-or-boy.scm
 
