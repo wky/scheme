@@ -7,5 +7,8 @@
       (+ (x4) (x5))
       (B)))
  
-(A 10 (lambda () 1) (lambda () -1) (lambda () -1) (lambda () 1) (lambda () 0))
+(define (man-or-boy n)
+	(display (A n (lambda () 1) (lambda () -1) (lambda () -1) (lambda () 1) (lambda () 0))))
+
+(man-or-boy 10)
 
