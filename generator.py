@@ -1,7 +1,7 @@
 #### Generator                                   ####
 #### generate bytecode from scheme source code.  ####
 ####                                             ####
-#### Version 1.3                                 ####
+#### Version 1.5                                 ####
 #### By featheryleaf                             ####
 #### 2013.11                                     ####
 
@@ -21,7 +21,7 @@ _pattern = r'''
 (?P<separator>  [\(\)\[\]\{\}\|]|\#\()|      # separator  ( ) [ ] { } | #(
 (?P<bool>       \#t|\#f)|                    # boolean
 (?P<char>       \#\\(?:space|newline|\S))|   # char      #\a #\Z #\space #\newline
-(?P<string>     "(?:\"|[^"])*")|             # string
+(?P<string>     "(?:\\\\|\\\"|[^"\\])*")|        # string
 (?P<number>     [+-]?\d*\.?\d+)|             # number (without prefix, suffix, scientific and complex)
 (?P<symbol>     [\w!$%&*+-./:<=>?@^_~]+)|    # symbol
 (?:             .+)                          # invalid pattern
@@ -37,7 +37,11 @@ def segment(string):
 assert segment(r'(1 2)')                  == ['(', '1', ' ', '2', ')']
 assert segment(r'#\c #\space #\newline')  == ['#\\c', ' ', '#\\space', ' ', '#\\newline']
 assert segment(r'#t #f')                  == ['#t', ' ', '#f']
+#assert segment(r'"\"')                    == [r'"\"']
 assert segment(r'"string"')               == ['"string"']
+assert segment(r'("str1" "str2")')        == ['(', '"str1"', ' ', '"str2"', ')'], \
+       "%s vs %s" % (segment(r'("str1" "str2")'), ['(', '"str1"', ' ', '"str2"', ')'])
+assert segment(r'"\""')                   == [r'"\""'], "%s vs %s" % (segment(r'"\""'), [r'"\""'])
 assert segment(r'#()')                    == ['#(', ')']
 assert segment(r'symbol ...')             == ['symbol', ' ', '...']
 assert segment(r'12 1.2 +12 -1.2 .1 -.1') == \
@@ -196,14 +200,15 @@ def gen_define(token): # (define <symbol> <value>) or (define (<symbol> <param-l
   elif isinstance(token[1], list): # (define (<symbol> <param-list>) <body>)
     if len(token) < 3 or not isinstance(token[1], list) or len(token[1]) == 0:
       raise SchemeSyntaxError('invalid syntax ' + str(token).translate(string.maketrans('[],', '() ')) + '!')
-    _, (symbol, *param_list), *exp_list, tail_list = token
+    _, (symbol, *param_list), *exp_list, tail_exp = token
+    rank, idx = Global.add_symbol(symbol)
     if not isinstance(symbol, Symbol):
       raise SchemeSyntaxError('invalid syntax ' + str(token).translate(string.maketrans('[],', '() ')) + '!')
     new_proc = Procedure()
     new_proc.push_env()
     index = len(Global.const_table) - 1
     
-    _, param_list, *exp_list, tail_exp = symbol
+    #_, param_list, *exp_list, tail_exp = symbol
     gen_param_list(param_list)
     for exp in exp_list:
       generate(exp)
@@ -212,6 +217,8 @@ def gen_define(token): # (define <symbol> <value>) or (define (<symbol> <param-l
     
     new_proc.pop_env()
     Global.gen_bytecode([PUSH, GLOBAL, index])
+    Global.gen_bytecode([POP, LOCAL, rank, idx])
+    Global.gen_bytecode([PUSH, NULL])
 
   else:
     raise SchemeSyntaxError('invalid syntax (%s is not a symbol)!' % symbol)    
