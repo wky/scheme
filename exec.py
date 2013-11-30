@@ -7,6 +7,8 @@ class SchemeBytecodeError(SchemeError):pass
 class SchemeInvalidOperationError(SchemeError):pass
 class SchemeRuntimeError(SchemeError):pass
 class Cont: #Activation Records
+	__slots__ = ["procedure", "argc", "prev_cont", "prev_proc_cont", "local_vars", "cur_pc", "ret_pc", "stack"] 
+	# init_cnt = 0
 	'Continuation, execution envrionment of an procedure'
 	def __init__(self, init_proc=None, argc=None):
 		self.procedure = init_proc
@@ -17,9 +19,10 @@ class Cont: #Activation Records
 		self.local_vars = None
 		self.cur_pc = None
 		self.ret_pc = None
-		self.embryo = True
+		# self.embryo = True
 		# only caught continuations have stack and restore_pc
 		self.stack = None
+		# Cont.init_cnt = Cont.init_cnt + 1
 	def copy(self):
 		c = Cont(self.procedure, self.argc)
 		c.local_vars, c.stack = self.local_vars, self.stack
@@ -35,6 +38,21 @@ class ExecEnv:
 		# self.sp = -1
 		self.cc = None
 
+def optimize_bycode(proc):
+	byc = proc.bytecode_list[0]
+	if byc[0] == ALLOC and byc[1] == 0: # remove ALLOC 0
+		proc.bytecode_list.pop(0)
+	byc = proc.bytecode_list[0]
+	if byc[0] == POPN and byc[1] == 0: # remove POPN 0
+		proc.bytecode_list.pop(0)
+	i = 0
+	while i + 1 < len(proc.bytecode_list):
+		if proc.bytecode_list[i] == [PUSH, NULL] and proc.bytecode_list[i+1] == [POP, NULL]:
+			proc.bytecode_list.pop(i)
+			proc.bytecode_list.pop(i)
+		else:
+			i = i + 1
+
 def trace_back(cc, trace_rank, item_idx, assign=False, new_val=None):
 	# print(str(cc))
 	while trace_rank:
@@ -49,21 +67,22 @@ def trace_back(cc, trace_rank, item_idx, assign=False, new_val=None):
 	# cont.stack = env.stack.copy()
 	# return cont # deep-copy continuation chain, duplicate stack
 
-def restore_cc(env, cont, arg):
-	# del env.stack, env.cc
-	env.stack = cont.stack.copy()
-	env.stack.append(arg)
-	env.cc = cont.copy()
-	env.cc.stack = None
-	# env.cc = cont
+# def restore_cc(env, cont, arg):
+# 	# del env.stack, env.cc
+# 	env.stack = cont.stack.copy()
+# 	env.stack.append(arg)
+# 	env.cc = cont.copy()
+# 	env.cc.stack = None
+# 	# env.cc = cont
 
-def exec_bytecode(env):
+def exec_bytecode():
 	bytecodes = Global.bytecode_list
 	byc = bytecodes[0]
 	byc_idx = 1
-	if env.cc: env.cc.cur_pc = byc_idx
+	# if env.cc: env.cc.cur_pc = byc_idx
+	stack = []
+	cc = None
 	while True:
-		# print(byc)
 		if   byc[0] == NOP:
 			print('encountered NOP')
 		elif byc[0] == PUSH:
@@ -72,132 +91,140 @@ def exec_bytecode(env):
 			elif byc[1] == GLOBAL:
 				item = Global.const_table[byc[2]]
 				if isinstance(item, Procedure):
+					# optimize_bycode(item)
 					c = Cont(item)
-					prev = env.cc
+					prev = cc
 					if prev:
 						while not prev.procedure is item.parent: prev = prev.prev_proc_cont
 					c.prev_proc_cont = prev
 					item = c
 			elif byc[1] == LOCAL:
-				item = trace_back(env.cc, byc[2], byc[3])
-			elif byc[1] == SPECIAL and byc[2] == CC:
-				item = env.cc
-				item.stack = env.stack.copy()
+				item = trace_back(cc, byc[2], byc[3])
+			elif byc[1] == CC:
+				item = cc
+				item.stack = stack.copy()
 			# print('pc:%d ' % byc_idx + str(item))
-			env.stack.append(item)
+			stack.append(item)
 		elif byc[0] == POP:
-			item = env.stack.pop()
-			if   byc[1] == NULL: pass
-			elif byc[1] == LOCAL: trace_back(env.cc, byc[2], byc[3], True, item)
-			else: raise SchemeInvalidOperationError('not allowed to modify native/special')
+			item = stack.pop()
+			if byc[1] == LOCAL: trace_back(cc, byc[2], byc[3], True, item)
+			# else: raise SchemeInvalidOperationError('not allowed to modify native/special')
 		elif byc[0] == POPN:
 			n = byc[1]
-			if n == 1 and isinstance(env.stack[-1], Cont) and env.stack[-1].stack != None:
+			if n == 1 and isinstance(stack[-1], Cont) and stack[-1].stack != None:
 				# print("call/cc")
-				cont = env.stack[-1].copy()
-				env.stack[-1].stack = None
-				env.stack[-1] = cont
-			if n:
-				env.cc.local_vars[:n] = list(reversed(env.stack[-n:]))
-				del env.stack[-n:]
+				cont = stack[-1].copy()
+				stack[-1].stack = None
+				stack[-1] = cont
+			elif n:
+				cc.local_vars[:n] = list(reversed(stack[-n:]))
+				del stack[-n:]
 		elif byc[0] == POPL:
-			n = env.cc.argc
-			item = list2pair(list(reversed(env.stack[-n:])))
-			del env.stack[-n:]
+			n = cc.argc
+			item = list2pair(list(reversed(stack[-n:])))
+			del stack[-n:]
 			if   byc[1] == NULL: pass
-			elif byc[1] == LOCAL:   trace_back(env.cc, byc[2], byc[3], True, item)
+			elif byc[1] == LOCAL:   trace_back(cc, byc[2], byc[3], True, item)
 			else: raise SchemeBytecodeError('invalid destination for POPL' % byc[1])
 		elif byc[0] == ALLOC:
-			# print("ALLOC %d for " % byc[1], str(env.cc))
-			env.cc.local_vars = [None]*byc[1]
+			# print("ALLOC %d for " % byc[1], str(cc))
+			cc.local_vars = [None]*byc[1]
 		elif byc[0] == CALL:
-			item = env.stack.pop()
+			item = stack.pop()
 			# if isinstance(item, Procedure):
 			# 	new_cont = Cont(item, byc[1])
-			# 	if env.cc: 
-			# 		new_cont.prev_cont = env.cc
-			# 		c = env.cc
+			# 	if cc: 
+			# 		new_cont.prev_cont = cc
+			# 		c = cc
 			# 		while not c.procedure is item.parent: c = c.prev_proc_cont
 			# 		new_cont.prev_proc_cont = c
-			# 	env.cc = new_cont
-			# 	env.cc.ret_pc = byc_idx
-			# 	env.cc.argc = byc[1]
-			# 	bytecodes = env.cc.procedure.bytecode_list
+			# 	cc = new_cont
+			# 	cc.ret_pc = byc_idx
+			# 	cc.argc = byc[1]
+			# 	bytecodes = cc.procedure.bytecode_list
 			# 	byc_idx = 0
-			if   isinstance(item, NativeProc): exec_native(env, item.id, byc[1])
+			if   isinstance(item, NativeProc): exec_native(stack, item.id, byc[1])
 			elif isinstance(item, Cont):
 				if not item.stack is None: # restore a cont.
-					restore_cc(env, item, env.stack.pop())
-					bytecodes = env.cc.procedure.bytecode_list
-					byc_idx = env.cc.cur_pc
+					arg = stack.pop()
+					stack = item.stack.copy()
+					stack.append(arg)
+					cc = item.copy()
+					cc.stack = None
+					bytecodes = cc.procedure.bytecode_list
+					byc_idx = cc.cur_pc
 				else:
 					new_cont = item.copy()
-					new_cont.embryo = False
-					if env.cc: new_cont.prev_cont = env.cc
-					env.cc = new_cont
-					env.cc.ret_pc = byc_idx
-					env.cc.argc = byc[1]
-					bytecodes = env.cc.procedure.bytecode_list
+					# new_cont.embryo = False
+					if cc: new_cont.prev_cont = cc
+					cc = new_cont
+					cc.ret_pc = byc_idx
+					cc.argc = byc[1]
+					bytecodes = cc.procedure.bytecode_list
 					byc_idx = 0
-					env.cc.cur_pc = byc_idx 
+					cc.cur_pc = byc_idx 
 			else: raise SchemeBytecodeError('invalid item to CALL:%s' % type(item))
 		elif byc[0] == NCAL:
-			exec_native(env, byc[1], byc[2])
+			exec_native(stack, byc[1], byc[2])
 		elif byc[0] == TCAL:
-			item = env.stack.pop()
+			item = stack.pop()
 			# if isinstance(item, Procedure):
-			# 	env.cc.procedure = item
-			# 	c = env.cc.prev_proc_cont
+			# 	cc.procedure = item
+			# 	c = cc.prev_proc_cont
 			# 	while not c.procedure is item.parent: c = c.prev_proc_cont
-			# 	env.cc.prev_proc_cont = c
-			# 	env.cc.argc = byc[1]
-			# 	bytecodes = env.cc.procedure.bytecode_list
+			# 	cc.prev_proc_cont = c
+			# 	cc.argc = byc[1]
+			# 	bytecodes = cc.procedure.bytecode_list
 			# 	byc_idx = 0
-			# 	env.cc.cur_pc = byc_idx
-			if isinstance(item, NativeProc): exec_native(env, item.id, byc[1])
+			# 	cc.cur_pc = byc_idx
+			if isinstance(item, NativeProc): exec_native(stack, item.id, byc[1])
 			if not isinstance(item, Cont):
-				print(env.stack)
+				print(stack)
 				print(bytecodes)
 				print(byc_idx)
 				raise SchemeRuntimeError("want to call a %s?" % type(item))
 			if not item.stack is None: # restore a cont.
-				restore_cc(env, item, env.stack.pop())
-				bytecodes = env.cc.procedure.bytecode_list
-				byc_idx = env.cc.cur_pc
+				arg = stack.pop()
+				stack = item.stack.copy()
+				stack.append(arg)
+				cc = item.copy()
+				cc.stack = None
+				bytecodes = cc.procedure.bytecode_list
+				byc_idx = cc.cur_pc
 			else:
 				new_cont = item.copy()
-				new_cont.embryo = False
-				new_cont.prev_cont = env.cc.prev_cont
-				new_cont.ret_pc = env.cc.ret_pc
-				env.cc = new_cont
-				env.cc.argc = byc[1]
-				bytecodes = env.cc.procedure.bytecode_list
+				# new_cont.embryo = False
+				new_cont.prev_cont = cc.prev_cont
+				new_cont.ret_pc = cc.ret_pc
+				cc = new_cont
+				cc.argc = byc[1]
+				bytecodes = cc.procedure.bytecode_list
 				byc_idx = 0
-				env.cc.cur_pc = byc_idx
+				cc.cur_pc = byc_idx
 		elif byc[0] == RET:
-			if env.cc.prev_cont: bytecodes = env.cc.prev_cont.procedure.bytecode_list
+			if cc.prev_cont: bytecodes = cc.prev_cont.procedure.bytecode_list
 			else: bytecodes = Global.bytecode_list
-			byc_idx = env.cc.ret_pc
-			env.cc = env.cc.prev_cont
+			byc_idx = cc.ret_pc
+			cc = cc.prev_cont
 		elif byc[0] == JUMP:
 			taken = True
 			if   byc[1] == TRUE:
-				taken = env.stack.pop() and True or False
+				taken = stack.pop() and True or False
 			elif byc[1] == FALSE:
-				if env.stack.pop(): taken = False
+				if stack.pop(): taken = False
 				else: taken = True
 			elif byc[1] == NEVER:
 				taken = False
 			if taken: byc_idx = byc_idx + byc[2]
 		else: raise SchemeBytecodeError('invalid bytecode [%d]' % byc[0])
 		if byc_idx == len(bytecodes):
-			if len(env.stack) != 1:
+			if len(stack) != 1:
 				print('Stack not right!')
 			print('Excution Complete. Bye Bye!')
 			return
 		byc = bytecodes[byc_idx]
 		byc_idx = byc_idx + 1
-		if env.cc: env.cc.cur_pc = byc_idx
+		if cc: cc.cur_pc = byc_idx
 
 def exec_file(fname):
 	with open(fname, 'r') as f:
@@ -207,7 +234,14 @@ def exec_file(fname):
 	token_list = tokens(seg_list)
 	generate(token_list)
 	Global.end()
-	exec_bytecode(ExecEnv())
+	for item in Global.const_table:
+		if isinstance(item, Procedure):
+			optimize_bycode(item)
+	exec_bytecode()
+	# print(Cont.init_cnt)
+
+# def represent_bytecode(byc):
+
 
 def main(args):
 	fname = 'test.scm'
@@ -217,7 +251,7 @@ def main(args):
 		print('Usage: exec.py srcfile')
 
 
-def exec_native(env, num, argc): 
+def exec_native(stack, num, argc): 
 	if num == PASS: pass
 	elif num == IS_EQ: pass
 	elif num == IS_EQV: pass
@@ -226,31 +260,31 @@ def exec_native(env, num, argc):
 	elif num == IS_BOOL: pass
 
 	elif num == ADD:
-		val = sum(env.stack[-argc:])
-		del env.stack[-argc:]
-		env.stack.append(val)
+		val = sum(stack[-argc:])
+		del stack[-argc:]
+		stack.append(val)
 	elif num == SUB:
-		val = env.stack.pop() - sum(env.stack[1-argc:])
-		del env.stack[1-argc:]
-		env.stack.append(val)
+		val = stack.pop() - sum(stack[1-argc:])
+		del stack[1-argc:]
+		stack.append(val)
 	elif num == MUL:
-		val = env.stack.pop()
+		val = stack.pop()
 		argc = argc - 1
 		while argc:
-			val = val * env.stack.pop()
+			val = val * stack.pop()
 			argc = argc - 1
-		env.stack.append(val)
+		stack.append(val)
 	elif num == DIV:
-		val = env.stack.pop()
+		val = stack.pop()
 		argc = argc - 1
 		while argc:
-			val = val / env.stack.pop()
+			val = val / stack.pop()
 			argc = argc - 1
-		env.stack.append(val)
+		stack.append(val)
 	elif num == ABS:
 		if argc != 1: raise SchemeRuntimeError('abs works on one argument only')
 		if isinstance(item, (int, float)):
-			if env.stack[-1] < 0: env.stack[-1] = -env.stack[-1]
+			if stack[-1] < 0: stack[-1] = -stack[-1]
 		else: raise SchemeRuntimeError('abs works on int or float only')
 	elif num == MAX: pass
 	elif num == MIN: pass
@@ -260,20 +294,20 @@ def exec_native(env, num, argc):
 	elif num == LE:
 		if argc != 2:
 			raise SchemeRuntimeError("<= takes two args")
-		a = env.stack.pop()
-		b = env.stack.pop()
-		env.stack.append(a<=b) 
+		a = stack.pop()
+		b = stack.pop()
+		stack.append(a<=b) 
 	elif num == BG:
 		if argc != 2:
 			raise SchemeRuntimeError("> takes two args")
-		a = env.stack.pop()
-		b = env.stack.pop()
-		env.stack.append(a>b)
+		a = stack.pop()
+		b = stack.pop()
+		stack.append(a>b)
 	elif num == BE: pass
 
 	elif num == IS_ZERO:
-		val = env.stack.pop()
-		env.stack.append(val == 0 or val == 0.0)
+		val = stack.pop()
+		stack.append(val == 0 or val == 0.0)
 	elif num == IS_POS: pass
 	elif num == IS_NEG: pass
 	elif num == IS_ODD: pass
@@ -314,17 +348,17 @@ def exec_native(env, num, argc):
 	elif num == WRITE: pass
 	elif num == DISPLAY:
 		# for i in range(argc):
-		# 	print(env.stack[-i-1])
+		# 	print(stack[-i-1])
 		while argc:
-			print(env.stack.pop())
+			print(stack.pop())
 			argc = argc - 1
-		env.stack.append(None)
+		stack.append(None)
 	# elif num == CALL_CC:
-	# 	proc = env.stack.pop()
+	# 	proc = stack.pop()
 	# 	item = env.cc
-	# 	item.stack = env.stack.copy()
-	# 	env.stack.append(item)
-	# 	env.stack.append(proc)
+	# 	item.stack = stack.copy()
+	# 	stack.append(item)
+	# 	stack.append(proc)
 	# 	call 1
 			
 	else: raise SchemeNativeError('native call [%d] does not exist' % num)

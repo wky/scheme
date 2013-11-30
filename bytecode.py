@@ -196,11 +196,11 @@ IMM     = 1
 GLOBAL  = 2
 LOCAL   = 3
 # NATIVE  = 4  #not used
-SPECIAL = 5
+CC = 5
 
 ## Special Variable (for SPECIAL variable)
 # PC = 0 # not used
-CC = 1
+# CC = 1
 
 ## Condition Code (for JUMP instruction)
 ALWAYS = 0
@@ -440,7 +440,7 @@ class Global:
     Global.global_proc.pop_env()
     Global.bytecode_list = [[PUSH, GLOBAL, 0], [CALL, 0]]
 
-  def print():
+  def print_global():
     print('global_proc:     ', Global.global_proc)
     print('cur_proc:        ', Global.cur_proc)
     print('bytecode_list:   ', Global.bytecode_list)

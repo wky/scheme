@@ -1,4 +1,8 @@
-(define x (lambda (n) (lambda (cc) (cc n) )))
+(define x 
+	(lambda (n) 
+		(lambda (cc) 
+			(cc n) )))
+
 (display (call-with-current-continuation (x 1))) 
 
 
@@ -29,8 +33,10 @@
 
 (define f
 	(lambda (x)
-			(lambda (y)
-				(+ x y))
+			(
+				lambda (y)
+				(+ x y)
+			)
 		))
 (display ((f 1) 2))
 
@@ -65,14 +71,16 @@
 
 (define caught 0)
 (define cnt 0)
+
 (display (call-with-current-continuation 
 	(lambda (cc)
 		(set! caught cc)
 		0)) )
+
 (set! cnt (+ cnt 1))
 
 (if (> cnt 10)
 	(display "done!")
 	(caught cnt))
-
-(begin (display "Begin a New Journey") (display "That's Right"))
+; (caught cnt)
+; (begin (display "Begin a New Journey") (display "That's Right"))

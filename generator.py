@@ -348,7 +348,7 @@ def gen_native_proc(token, tail=False):
   elif index == CALL_CC:                # (call/cc proc)
     if length != 2:
       raise SchemeSyntaxError('invalid syntax %s!' % list2pair(token))    
-    Global.gen_bytecode([PUSH, SPECIAL, CC])
+    Global.gen_bytecode([PUSH, CC])
     generate(token[1])
     if not tail:
       Global.gen_bytecode([CALL, 1])
