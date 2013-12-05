@@ -6,10 +6,6 @@
 (display (call-with-current-continuation (x 1))) 
 
 
-; (define add +)
-; (define call/cc call-with-current-continuation)
-
-
 (define fact
 	(lambda (n pro)
 		(if (zero? n)

@@ -454,6 +454,11 @@ class Global:
         if not isinstance(code, int):
           break
       else:
+        if (bytecode == [ALLOC, 0]) or bytecode == [POPN, 0]:
+          return
+        if  bytecode == [POP, NULL] and len(Global.bytecode_list) and Global.bytecode_list[-1] == [PUSH, NULL]:
+          Global.bytecode_list.pop()
+          return
         Global.bytecode_list.append(bytecode)
         return
     raise SchemeValueError('invalid bytecode format ( %s )!' % bytecode)

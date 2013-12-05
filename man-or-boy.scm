@@ -12,6 +12,6 @@
 
 
 ; (display "Show me -67 if you are a MAN:")
-(man-or-boy 17)
+(man-or-boy 10)
 
 
