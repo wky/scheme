@@ -23,6 +23,7 @@ class SchemeIOError(IOError, SchemeError)        : pass
 Void = type(None)
 Bool = bool
 Number = (int, float, complex)
+Scalar = (Void, Bool, int, float, complex)
 class Char(str)   : pass
 class String(str) : pass
 class Symbol(str) : pass
@@ -68,7 +69,7 @@ class Pair:
       cur = dfs.popleft()
       a = cur.car()
       b = cur.cdr()
-      if id(a) in hash or id(b) in hash:
+      if (not isinstance(a, Scalar) and id(a) in hash) or (not isinstance(b, Scalar) and id(b) in hash):
         return True
       if a is not None:
         hash[id(a)] = 1
@@ -399,6 +400,7 @@ class Global:
     
     Symbol('pair?'):       IS_PAIR,
     Symbol('list?'):       IS_LIST,
+    Symbol('list'):        LIST,
     Symbol('cons'):        CONS,
     Symbol('car'):         CAR,
     Symbol('cdr'):         CDR,

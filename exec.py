@@ -152,6 +152,7 @@ def exec_bytecode():
 		elif byc[0] == RET:
 			if cc.prev_cont: bytecodes = cc.prev_cont.procedure.bytecode_list
 			else: bytecodes = Global.bytecode_list
+			# print("ret<%s> from proc<%d> to proc<%d>:%d" % (str(stack[-1]), cc.procedure.id, cc.prev_cont.procedure.id, cc.ret_pc))
 			byc_idx = cc.ret_pc
 			cc = cc.prev_cont
 		elif byc[0] == POPL:
@@ -195,7 +196,12 @@ def main(args):
 
 def exec_native(stack, num, argc): 
 	if num == PASS: pass
-	elif num == IS_EQ: pass
+	elif num == IS_EQ:
+		if argc != 2: raise SchemeRuntimeError('eq? works on 2 argument only')
+		a = stack.pop()
+		b = stack.pop()
+		res = a is b
+		stack.append(res)
 	elif num == IS_EQV: pass
 	elif num == IS_EQUAL: pass
 	elif num == NOT: pass
@@ -224,15 +230,25 @@ def exec_native(stack, num, argc):
 			argc = argc - 1
 		stack.append(val)
 	elif num == ABS:
-		if argc != 1: raise SchemeRuntimeError('abs works on one argument only')
+		if argc != 1: raise SchemeRuntimeError('abs works on 1 argument only')
 		if isinstance(item, (int, float)):
 			if stack[-1] < 0: stack[-1] = -stack[-1]
 		else: raise SchemeRuntimeError('abs works on int or float only')
 	elif num == MAX: pass
 	elif num == MIN: pass
 
-	elif num == EQ: pass
-	elif num == LS: pass
+	elif num == EQ:
+		if argc != 2:
+			raise SchemeRuntimeError("= takes two args")
+		a = stack.pop()
+		b = stack.pop()
+		stack.append(type(a) is type(b) and a == b)
+	elif num == LS: 
+		if argc != 2:
+			raise SchemeRuntimeError("< takes two args")
+		a = stack.pop()
+		b = stack.pop()
+		stack.append(a < b)
 	elif num == LE:
 		if argc != 2:
 			raise SchemeRuntimeError("<= takes two args")
@@ -271,16 +287,30 @@ def exec_native(stack, num, argc):
 
 	elif num == IS_VECTOR:  pass
 
-	elif num == IS_PAIR: pass
+	elif num == IS_PAIR:
+		stack[-1] = isinstance(stack[-1], Pair)
 	elif num == IS_LIST: pass
-	elif num == CONS: pass
-	elif num == LIST: pass
-	elif num == CAR: pass
-	elif num == CDR: pass
+	elif num == CONS:
+		if argc != 2: raise SchemeRuntimeError("cons takes 2 argument")
+		a = stack.pop()
+		stack[-1] = Pair(a, stack[-1])
+	elif num == LIST:
+		l = []
+		while argc:
+			l.append(stack.pop())
+			argc = argc - 1
+		stack.append(list2pair(l))
+	elif num == CAR:
+		if argc != 1: raise SchemeRuntimeError("car takes 1 argument")
+		stack[-1] = stack[-1].car()
+	elif num == CDR:
+		if argc != 1: raise SchemeRuntimeError("cdr takes 1 argument")
+		stack[-1] = stack[-1].cdr()
 	elif num == SET_CAR: pass
 	elif num == SET_CDR: pass
-	elif num == IS_NULL: pass
-
+	elif num == IS_NULL:
+		if argc != 1: raise SchemeRuntimeError("null? takes 1 argument")
+		stack[-1] = (stack[-1] == None)
 	elif num == IS_PORT: pass
 	elif num == IS_SYMBOL: pass
 	elif num == IS_PROC: pass

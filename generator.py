@@ -267,33 +267,45 @@ def gen_param_list(param_list):
 
     
 ## Bytecode Generate - Quote
-    
+
 def gen_quote(token):
   if len(token) != 2 or token[0] != Symbol('quote'):
      raise SchemeSyntaxError('invalid syntax ' + str(list2pair(token)) + '!')
 
   if not isinstance(token[1], list):
-    gen_atom(token[1])
+    if isinstance(token[1], Void):
+      bytecode = [PUSH, NULL] # nothing will happen
+    elif isinstance(token[1], int):
+      bytecode = [PUSH, IMM, token]
+    else: # isinstance(token, (Symbol, Bool, float, complex, Char, String))
+      Global.add_const_table(token[1])
+      bytecode = [PUSH, GLOBAL, Global.find_const_table(token[1])]
+    Global.gen_bytecode(bytecode)
   else:
     pair = quote_list2pair(token[1])
     Global.add_const_table(pair)
     Global.gen_bytecode([PUSH, GLOBAL, Global.find_const_table(pair)])
-  
+def quote_atom(token):
+  if isinstance(token, Void):
+    return None
+  elif isinstance(token, int):
+    return token
+  else: # isinstance(token, (Bool, float, complex, Char, String))
+    Global.add_const_table(token)
+    return Global.const_table[Global.find_const_table(token)]
+
 def quote_list2pair(token):
   try:
     if not token:
       return None
-    elif len(token) > 1 and token[1] == Symbol('.'):
-      if len(token) != 3:
-        raise SchemeSyntaxError('invalid syntax ' + str(list2pair(token)) + '!')
-      elif not isinstance(token[2], list):
-        return Pair(token[0], token[2])
-      else:
-        return Pair(token[0], quote_list2pair(token[2]))
+    elif not isinstance(token, list):
+      return quote_atom(token)
+    elif len(token) == 3 and token[-2] == Symbol('.'):
+      return Pair(quote_list2pair(token[0]), quote_list2pair(token[2]))
     elif not isinstance(token[0], list):
-      return Pair(token[0], quote_list2pair(token[1:]))
+      return Pair(quote_atom(token[0]), quote_list2pair(token[1:]))
     else:
-      return Pair(list2pair(token[0]), quote_list2pair(token[1:]))
+      return Pair(quote_list2pair(token[0]), quote_list2pair(token[1:]))
     return
   except SchemeSyntaxError: pass
   raise SchemeSyntaxError('invalid syntax ' + str(list2pair(token)) + '!')
@@ -858,6 +870,6 @@ def main():
 
 
 if __name__ == '__main__':
-  Assertion_Main()
+  # Assertion_Main()
   main()
 
