@@ -226,7 +226,7 @@ def exec_native(stack, num, argc):
 		val = stack.pop()
 		argc = argc - 1
 		while argc:
-			val = val / stack.pop()
+			val = val // stack.pop()
 			argc = argc - 1
 		stack.append(val)
 	elif num == ABS:
@@ -236,7 +236,11 @@ def exec_native(stack, num, argc):
 		else: raise SchemeRuntimeError('abs works on int or float only')
 	elif num == MAX: pass
 	elif num == MIN: pass
-
+	elif num == MOD:
+		if argc != 2: raise SchemeRuntimeError('%% works on 2 argument only')
+		a = stack.pop()
+		b = stack.pop()
+		stack.append(a % b)
 	elif num == EQ:
 		if argc != 2:
 			raise SchemeRuntimeError("= takes two args")
@@ -320,7 +324,7 @@ def exec_native(stack, num, argc):
 	elif num == WRITE: pass
 	elif num == DISPLAY:
 		while argc:
-			print(stack.pop())
+			print(stack.pop(), end="")
 			argc = argc - 1
 		stack.append(None)
 	else: raise SchemeNativeError('native call [%d] does not exist' % num)

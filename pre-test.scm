@@ -85,33 +85,72 @@
      (begin result1 result2 ...)
      (case key clause clauses ...))])
 
-(define (x< y) (lambda (x) (< x y)))
-(define (x> y) (lambda (x) (> x y)))
-(define <x x>)
-(define >x x<)
+
+; (define (ash x n)
+;   (if (= n 0) x (ash (* 2 x) (- n 1))))
+; (define (remainder x m) (% x m))
+; (define (idiv x y) (/ x y))
+; (display
+;   (let loop ([n (+ 1 (ash 1 50))] [i 2] [l '()] [s 1])
+;     (cond
+;       [(> (* i i) n) (cons n l)]
+;       [(zero? (remainder n i)) (loop (idiv n i) i (cons i l) s)]
+;       [else (loop n (+ i s) l 2)])))
+
+; (268501 8101 101 41 5 5 5)
+
+; (define (A n m)
+;   (cond
+;     [(= n 0) (+ 1 m)]
+;     [(= m 0) (A (- n 1) 1)]
+;     [else (A (- n 1) (A n (- m 1)))]))
+; (display (A 3 3))
+
+; (define (append l1 l2)
+;   (if (null? l1) l2
+;     (if (null? l2) l1
+;       (cons (car l1) (append (cdr l1) l2)))))
+
+; (define (foldr f b l)
+;   (if (null? l) b
+;     (f (car l) (foldr f b (cdr l)))))
+
+
+; (define (map-aux f l r)
+;   (if (null? l) r
+;     (cons (f (car l)) (map-aux f (cdr l) r))))
+; (define (map f l)
+;   (map-aux f l '()))
+
+; (display
+;   (foldr (lambda (x ls) (append (map (lambda (l) (cons x l)) ls) ls)) 
+;     '(()) '(1 2 3 4)))
+
+
+; (define (x< y) (lambda (x) (< x y)))
+; (define (x> y) (lambda (x) (> x y)))
+; (define <x x>)
+; (define >x x<)
 ; (define (memv x ls)
 ;   (if (null? ls) #f
 ;     (if (eq? (car ls) x) ls
 ;       (memv x (cdr ls)))))
-(define (pretty-print x) (display x))
+; (define (pretty-print x) (display x))
 
 
-(begin
-  (define (e? ep op x) (or (= x 0) (op ep op (- x 1))))
-  (define (o? ep op x) (and (> x 0) (ep ep op (- x 1))))
-  (pretty-print (e? e? o? 1000001))
-  (pretty-print (o? e? o? 2000000))
-  )
+; (begin
+;   (define (e? ep op x) (or (= x 0) (op ep op (- x 1))))
+;   (define (o? ep op x) (and (> x 0) (ep ep op (- x 1))))
+;   (pretty-print (e? e? o? 1000001))
+;   (pretty-print (o? e? o? 2000000))
+;   )
 
 ; (define (filter f l)
 ; 	(if (null? l) l
 ; 		(let ([a (car l)] [l (filter f (cdr l))])
 ; 			(if (f a) (cons a l) l))))
 
-; (define (append l1 l2)
-; 	(if (null? l1) l2
-; 		(if (null? l2) l1
-; 			(cons (car l1) (append (cdr l1) l2)))))
+
 
 ; (define (sort l)
 ;   (if (null? l) l

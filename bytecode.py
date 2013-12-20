@@ -87,7 +87,7 @@ class Pair:
 
   def __str__(self):
     string = '('
-    if not self.is_circular():
+    if True:#not self.is_circular():
       a = self
       while isinstance(a, Pair):
         if a is not self:
@@ -224,6 +224,7 @@ SUB        = 52
 MUL        = 53
 DIV        = 54
 ABS        = 55
+MOD        = 56
 
 MAX        = 57
 MIN        = 58
@@ -363,6 +364,7 @@ class Global:
     Symbol('abs'):            ABS,
     Symbol('max'):            MAX,
     Symbol('min'):            MIN,
+    Symbol("%"):              MOD,
     Symbol('='):              EQ,
     Symbol('<'):              LS,
     Symbol('<='):             LE,
