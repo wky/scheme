@@ -1,0 +1,1149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Scheme解释器报告</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+</head>
+<body>
+<h1>Scheme 解释器报告</h1>
+<hr />
+<h2>1. 选题</h2>
+<p>使用 Scheme 和 Python 实现一个 Scheme 解释器。</p>
+<h3>1.1  Why Scheme?</h3>
+<ol>
+<li>函数式语言，可以学习理解不同的编程模型；</li>
+<li>语法简单，代码规范不足 50 页；</li>
+<li>E478对Scheme语言比较熟悉。</li>
+</ol>
+<h3>1.2  Why Python?</h3>
+<ol>
+<li>比 C 语言更灵活的语义特性和丰富的内置库；</li>
+<li>不需要自己管理垃圾回收；</li>
+<li>wky对 Python 语言比较熟悉。  </li>
+</ol>
+<p>(预处理部分使用 Scheme 语言编写)</p>
+<h3>1.3  Why not compiler?</h3>
+<p>编译器将遇到实现上困难：</p>
+<ol>
+<li>依赖具体机器的编译器后端；</li>
+<li>垃圾回收模块的实现与测试；</li>
+<li>动态类型的编译支持。</li>
+</ol>
+<p>这些困难的解决需要更多的时间和精力。</p>
+<hr />
+<h2>2. 分工</h2>
+<ul>
+<li><strong>Part A: 宏的预处理   (by E478)</strong>；</li>
+<li><strong>Part B: 中间代码生成 (by featheryleaf)</strong>；</li>
+<li><strong>Part C: 解释执行     (by wky)</strong>。</li>
+</ul>
+<h3>2.1 Why Preprocess</h3>
+<p>Scheme支持复杂的宏定义，需要单独处理。</p>
+<h3>2.2 Why Bytecode</h3>
+<ol>
+<li>一定程度上弥补了不能编译的缺憾；</li>
+<li>多次解释同一个程序时，只需执行 Part C；</li>
+<li>方便分工合作。</li>
+</ol>
+<hr />
+<h2>3. 宏的预处理 (by E478)</h2>
+<h3>3.1  算法</h3>
+<ol>
+<li>首先使用 scheme 的 <code>read</code> 函数直接读入 S 表达式；</li>
+<li>由于 S 表达式本质上就是一颗树，故我们在树上做遍历，对于每个结点都递归处理；</li>
+<li>
+处理结点时，先判断是否为 <code>(define-syntax ...)</code> 的格式。
+<ul>
+<li>若是，进行 <strong>宏定义</strong> 的处理；</li>
+<li>否则，进行 <strong>匹配宏</strong> 的处理。</li>
+</ul>
+</li>
+</ol>
+<h3>3.2  宏定义的处理</h3>
+<p>依次识别宏定义参数中的变量，将每个 <code>symbol</code> 转化为 <code>(symbol-type . symbol)</code>。
+其中 <code>symbol-type</code> 的可能取值: <code>#t</code> 表示变量，<code>#f</code> 表示常量，<code>...</code> 表示是一个匹配表的变量。</p>
+<blockquote>
+<pre><code>(define-syntax when (key1 key2)  
+  [(_ x e ...) (if x ((lambda () e ...)))]  
+  [(_ key1) '(this is (when key1))]  
+  [(_ #f key2 1) (when key2)])
+</code></pre>
+
+</blockquote>
+<ol>
+<li>
+<p>首先 <code>(key1 key2)</code> 被识别为两个自定义关键字 <code>key1</code> 和 <code>key2</code></p>
+</li>
+<li>
+<p>然后依次处理之后的三个 pattern</p>
+<ul>
+<li>
+<p>1) 第一个 pattern 为 <code>(_ x e ...)</code>，</p>
+<p><code>_</code> 是一个占位符，没有实际意义，忽略；<br />
+<code>x</code> 是一个变量，因而被转化为 <code>(#f . x)</code>；<br />
+<code>e ...</code> 是一个匹配表的变量，故转化为 <code>(... . e)</code>。</p>
+<p>最后生成的列表为 <code>((#f . x) (... . e))</code></p>
+</li>
+<li>
+<p>2) 第二个 pattern 为 <code>(_ key1)</code>
+<code>key1</code> 是宏关键字，即常量，故直接生成 <code>((#t . key1))</code>。</p>
+</li>
+<li>
+<p>3) 最后一个 pattern 为 <code>(_ #f key2 1)</code>，
+ <code>#f</code> 和 <code>1</code> 都是字面常量，而 <code>key2</code> 是宏关键字。
+ 我们生成的就是 <code>((#t . #f) (#t . key2) (#t . 1))</code>。</p>
+</li>
+</ul>
+<p>如此处理了所有的 pattern 。</p>
+</li>
+<li>
+<p>之后我们来看对 output 的预处理</p>
+<ul>
+<li>
+<p>1) 第一个 output 为 <code>(if x ((lambda () e ...)))</code>，
+ 如法炮制，生成 <code>((#f . if) (#t . x) (((#f . lambda) () (... . e))))</code>。</p>
+<p>注意到 <code>if</code> 和 <code>lambda</code> 是 scheme 默认支持的 procedure。
+ 是作为字面直接输出的，因而标记为 <code>#f</code> 。</p>
+</li>
+<li>
+<p>2) 类似的，第二个 output <code>'(this is (when key1))</code>，
+ 转化后为 <code>((#f . quote) ((#f . this) (#f . is) ((#f . when) (#f . key1))))</code>.</p>
+<p>其中 <code>'x</code> 在 scheme 中定义为 <code>(qoute x)</code> 的简写，这里做了还原展开。</p>
+</li>
+<li>
+<p>3) 最后一个 output  <code>(when key2)</code>，
+   转化为 <code>((#f . when) (#f . key2))</code>。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3>3.3 匹配宏的处理</h3>
+<p>对 S 表达式的每一层 <code>(symbol ...)</code>，看能否匹配某个已定义的宏调用的结构 <code>(macro ...)</code>。</p>
+<blockquote>
+<pre><code>(when (x 1)  
+  (display &quot;hello, &quot;)  
+  (display (when #f key2 1)))
+</code></pre>
+
+</blockquote>
+<ol>
+<li>
+<p>首先它匹配 <code>(when ...)</code> 宏。</p>
+</li>
+<li>
+<p>因此我们将 <code>when</code> 宏中各个 pattern 逐个匹配之后的语句</p>
+<ul>
+<li>如果匹配到某个 pattern ，就根据对应的 output 输出 (并不再继续匹配后面的 pattern )；</li>
+<li>如果没有匹配，则预处理器报错。</li>
+</ul>
+<p>显然 <code>((&gt; x 1) (display &quot;hello, &quot;) (display (when #f key2 1)))</code>，能匹配第一个 pattern <code>(x e ...</code>) 。</p>
+<p><strong>以下是预处理器的具体过程。</strong></p>
+</li>
+<li>
+<p>试图将 <code>((#f . x) (... . e))</code> 与上述 S 表达式进行匹配。</p>
+<ul>
+<li>1) 首先 <code>(#f . x)</code> 匹配到 <code>(&gt; x 1)</code>， <code>x</code> 赋值为 <code>'(&gt; x 1)</code>；</li>
+<li>
+2) 然后 <code>(... . e)</code> 匹配到 <code>(display &quot;hello, &quot;) (display (when #f key2 1))</code>，
+  <code>e ...</code> 赋值为一个列表 <code>[(display &quot;hello, &quot;) (display (when #f key2 1))]</code>。  
+
+</li>
+</ul>
+</li>
+<li>
+<p>然后根据 output 输出，即
+   遍历 <code>((#f . if) (#t . x) (((#f . lambda) () (... . e))))</code></p>
+<ul>
+<li>1) <code>(#f . if)</code>： <code>#f</code> 表示常量，输出字面量 <code>'if</code></li>
+<li>2) <code>(#t . x)</code>： <code>#t</code> 表示变量，输出 <code>x</code> 的值 <code>'(&gt; x 1)</code></li>
+<li>3) <code>(#f . lambda)</code>： 常量，输出字面量 <code>'lambda</code></li>
+<li>
+4) <code>(... . e)</code>： <code>...</code> 表示匹配表的变量，逐个输出 <code>e ...</code> 的项，即输出 
+<code>'(display &quot;hello, &quot;) '(display (when #f key2 1))</code>。
+</li>
+</ul>
+<p>我们得到输出：
+<code>(if (&gt; x 1) ((lambda () (display &quot;hello, &quot;) (display (when #f key2 1))))</code>。</p>
+</li>
+<li>
+<p>但是还没完。<code>(when #f key2 1)</code> 又是一个宏调用，所以我们重复 1. ~ 4. 的过程。</p>
+<ul>
+<li>
+<p>2nd pass: <code>(#f key2 1)</code> 匹配到 <code>(_ #f key2 1)</code>，根据 output 输出为 <code>(when key2)</code>；</p>
+</li>
+<li>
+<p>3rd pass: 这里依然有宏调用，我们进行第三次展开，得到 <code>(quote (this is (when key1)))</code>。</p>
+<p>其中 <code>(quote (this is (when key1)))</code> 的意义为 <code>(this is (when key1))</code> 的字面意义，
+ 因而不对其继续展开。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>终于，我们得到最终输出：</p>
+</li>
+</ol>
+<blockquote>
+<pre><code>(if (&gt; x 1)  
+  ((lambda ()
+    (display &quot;hello, &quot;)
+    (display (quote (this is (when key1)))))))
+</code></pre>
+
+</blockquote>
+<h3>3.4 关键函数及其作用</h3>
+<ul>
+<li>
+<p><code>analyze</code> 函数：将宏定义中的 pattern 和 output 转化为 <code>(#t/#f/... . ???)</code> 形式。</p>
+</li>
+<li>
+<p><code>process-pattern</code> 函数：用来预处理宏定义的主函数，主要就是调用了 <code>analyze</code> 做了两遍转换。</p>
+</li>
+<li>
+<p><code>pattern-match</code> 函数：匹配宏调用主体和宏定义中 pattern 的函数，
+                首先将匹配的 pattern 中的变量做了赋值，
+                然后根据变量赋值表和 output 产生真正的输出。</p>
+</li>
+<li>
+<p><code>preprocess</code> 函数：进行预处理的主函数，就是通过遍历的方式，根据不同情况分别调用
+             <code>process-pattern</code> 和 <code>pattern-match</code> 函数，以达到对宏定义和宏调用的预处理。</p>
+</li>
+</ul>
+<h3>3.5  遇到的困难</h3>
+<ol>
+<li>
+<p>一开始对于 <code>quote</code> 没处理好，没有直接将其做为 literal 输出，导致例子中的宏调用会死循环地无限展开下去。</p>
+</li>
+<li>
+<p>其次在 Scheme 中，可用的数据结构太少，基本上只能使用 list 。
+   这样就无法轻易区分一个符号到底是常量，还是变量，还是匹配表的变量。
+   此时我采用的方法就是 explicit typing，即每个符号之前都加上其类型来表示。
+   具体的说就是将 <code>x</code> 变为 <code>(type-x . x)</code>，就如上所说的产生了若干 <code>(#t/#f/... . ???)</code> 形式的列表。</p>
+</li>
+<li>
+<p>最后是一个很微妙的细节：<br />
+   由于 <code>(x ...)</code> 是能匹配空列表的。
+   对于最初的代码，当我遇到空表的时候，我是没有对 <code>x ...</code> 做赋值的，这样就导致之后的输出出错。
+   后来修正的时候，就是在遇到空表时，做特判将 <code>x ...</code> 赋一个空值。</p>
+</li>
+</ol>
+<p>这个小小的预处理器，表面看似简单，但实际真做起来的时候，会有无数的细节在等着你。由于时间和精力有限，我的预处理器只能支持常见 90% 的宏定义（当然包括常用的系统宏如 <code>let, begin, cond, case</code> 等）。而剩下的一些奇怪的语法，如 pattern 中的 improper list，预处理器是不能正常工作的。这些语法理论上是没有技术难度的，但如果要支持，则势必增加很多细节方面的工作。工作量其实并不小，故在此没有实现。</p>
+<hr />
+<h2>4. 中间代码生成 (by featheryleaf)</h2>
+<h3>4.1 bytecode protocol</h3>
+<p>中间代码在设计时需要兼顾中间代码生成和解释执行两方面的需求。<br />
+在介绍中间代码生成之前，先介绍中间代码的语义：</p>
+<ol>
+<li>
+<p><code>nop</code>： 无操作<br />
+为兼容性考虑加入的，在实际生成中没有用到。</p>
+</li>
+<li>
+<p><code>push %var</code>： 将变量 <code>%var</code> (的指针)压栈<br />
+用于变量赋值和参数传递。<br />
+解释器采用栈式模型，在一个全局栈中进行参数和返回值的传递。
+<code>%var</code> 的具体形式见后。</p>
+</li>
+<li>
+<p><code>pop  %var</code>： 将栈顶元素弹栈，并赋值给 <code>%var</code><br />
+用于变量赋值和清理无用返回值。</p>
+<blockquote>
+<pre><code>(define f 1)  
+
+push 1  
+pop  f  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>call n</code>： 调用栈顶元素，n 个参数<br />
+这里栈顶必须是一个过程，否则执行期报错。
+将调用的过程也压栈，而非 <code>call %proc n</code> 同样考虑到其他情况，详见后。</p>
+<blockquote>
+<pre><code>(f x)
+
+push x  
+push f  
+call 1  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>ret</code>： 过程返回<br />
+每个过程都要保证在栈顶存留一个返回值，这一点由代码生成保证。</p>
+<blockquote>
+<pre><code>(define f (lambda () 1))
+
+push 1  
+ret
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>jump %cond offset</code>： 条件跳转  
+</p>
+<ul>
+<li>若 <code>%cond</code> 为真，则 <code>next-pc = pc + 1 + offset</code>；  
+</li>
+<li>否则 <code>next-pc = pc + 1</code>。  
+</li>
+</ul>
+<p>其中 <code>%cond</code> 有 <code>always, true, false, never</code> 四种可能</p>
+<ul>
+<li>如果 <code>%cond == always</code>，无条件为真；  
+</li>
+<li>如果 <code>%cond == never</code>，相当于 <code>nop</code>；  
+</li>
+<li>如果 <code>%cond == true || %cond == false</code>，则需要测试栈顶元素，根据栈顶元素的 <code>bool</code> 值判断真假。<br />
+实际生成时只用到了 <code>false</code> 和 <code>always</code>。  
+</li>
+</ul>
+<blockquote>
+<pre><code>(if a b c)  
+
+push a  
+jump false  2  
+push b  
+jump always 1  
+push c  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>tcal</code>： n
+尾递归调用栈顶元素，不生长 continuation Chain ，其他同 call n，详见解释执行阶段。</p>
+<blockquote>
+<pre><code>(lambda () (f) (g))  
+
+push f  
+call 0     // f 是正常调用  
+pop  null  // 将 f 过程返回值弹出  
+push g  
+tcal 1     // g 是尾调用，将复用匿名过程的 continuation  
+ret        // 由于 continuation 被复用，这条语句实际上不会被执行到  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>ncal %native-proc n</code>： 调用内置过程， n 个参数<br />
+直接解释执行，不影响 continuation Chain 。</p>
+<blockquote>
+<pre><code>(+ 1 2)  
+
+push 2  
+push 1  
+ncal + 2   // 将栈上 1 和 2 弹出，计算后压入返回值 3  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>alloc n</code>： 声明该过程有 n 个局部变量<br />
+提示解释执行模块开辟适当内存。</p>
+<ul>
+<li>若不考虑优化，<code>alloc n</code>一定为每个过程的第一条语句；  
+</li>
+<li>但 <code>alloc 0</code> 可能被优化掉。  
+</li>
+</ul>
+</li>
+<li>
+<p><code>popn n</code>： 将栈顶 n 个元素弹出，依次赋值到前 n 个局部变量<br />
+用于参数传递。<br />
+“依次”的具体含义取决于参数传递的协议。当前的协议是从右向左压栈。</p>
+</li>
+<li>
+<p><code>popl %var</code>： 将剩余的参数作为一个表赋值到 <code>%var</code> 变量<br />
+用于参数传递。<br />
+剩余参数的个数，由该过程被调用时 <code>call n</code> 或 <code>tcal n</code> 以及其之前的 <code>popn m</code> 相减后得到。<br />
+每个过程一定以 <code>alloc n</code> 开始，之后为 1-2 条 <code>popn</code> 或/和 <code>popl</code> 指令。  
+</p>
+<blockquote>
+<pre><code>(lambda (x y) (+ x y))
+
+alloc 2  
+popn  2    // 将 2 个参数赋值到 x, y  
+push  y  
+push  x  
+ncal  + 2  // + 的返回值直接作为返回值返回  
+ret 
+</code></pre>
+
+<hr />
+<pre><code>(lambda (x . y) (define z (cons x y)))
+
+alloc 3    // 注意这里为 z 预留了位置  
+popn  1    // 将第一个参数赋值到 x  
+popl  y    // 将剩余的参数赋值到 y  
+push  y  
+push  x  
+ncal  cons 2  
+pop   z    // 将 cons 的返回值赋值到 z  
+push  z    // 压入返回值 (注意此时栈上是空的)  
+ret
+</code></pre>
+
+</blockquote>
+</li>
+</ol>
+<h3>4.2 变量类型</h3>
+<ol>
+<li>
+<p><code>null</code>： 空类型<br />
+   <code>push null</code> 意为压入空值；<code>pop null</code> 意为直接弹出栈顶，不予赋值。</p>
+<blockquote>
+<pre><code>(define x 1)  
+(define y 2)  
+
+push imm   1  
+pop  local (0, 0)  
+push null         // 这里压入 (define x 1) 的返回值  
+pop  null         // 在 (define y 2) 开始前，要清掉栈上无用的返回值  
+                  // 这时在不作优化时生成的代码，实际上以上两条语句可以被优化掉  
+push imm   2  
+pop  local (0, 1)  
+push null         // 同样的，压入 (define y 2) 的返回值  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>imm n</code>： 立即数 n<br />
+   只使用立即数表示整数。</p>
+<blockquote>
+<pre><code>(+ 1 2)  
+
+push imm 2  // 这是立即数 2 的真实表示  
+push imm 1  
+ncal +   2  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>global n</code>： 全局常量第 n 项<br />
+   使用一个全局变量表，保存所有非整数常量(字符串，匿名过程等)，通过下标进行引用。<br />
+   (整个 bytecode list 作为匿名过程保存在 <code>global[0]</code>)</p>
+<blockquote>
+<pre><code>((lambda () #t))  
+
+global-table = [global-lambda, unnamed-lambda, #t]  
+
+[global-lambda]  
+push global 1  // 压入 global[1] = unnamed-lambda  
+tcal 0         // 调用 unnamed-lambda  
+ret  
+
+[unnamed-lambda]  
+push global 2  // 压入 global[2] = `#t`  
+ret  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>local (n, m)</code>： n 阶父过程的局部变量第 m 项
+   scheme 中过程允许嵌套定义，子过程可以访问父进程的局部变量。
+   因此局部变量访问时，通过二维索引进行引用，第一维为嵌套的深度，第二维为在局部变量表的下标。
+   在实现时，通过引用链查找 n 次父过程，然后查找该过程局部变量表的第 m 项。  
+</p>
+<blockquote>
+<pre><code>(define y 2)  
+(define (f x) (+ x y))  
+(f 1)  
+
+global-table                = [global-lambda, lambda-f, #t]  
+local-table @ global-lambda = [y, f]  
+local-table @ lambda-f      = [x]  
+
+[global-lambda]  
+push imm 2  
+pop  local (0, 0)           // 弹出到 y  
+push global 1               // 压入 lambda-f  
+pop  local (0, 1)           // 弹出到 f
+push imm 1
+push local (0, 1)  
+tcal 0                      // 以参数 1 ，调用 f  
+ret  
+
+[lambda-f]  
+alloc 1  
+popn  1                     // 弹出到 y  
+push  local (1, 0)          // 压入 y (注意，这里 y 在 f 的父进程中，所以索引是 (1, ?) )  
+push  local (0, 0)          // 压入 x  
+ncal  +     2  
+ret  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>special cc</code>： 特殊变量 current-continuation<br />
+   用于 <code>call/cc</code> 过程，详见 <strong>5. 解释执行</strong> 部分。</p>
+</li>
+</ol>
+<h3>4.3 词法分析</h3>
+<ol>
+<li>
+<p>分词</p>
+<p>Python 内置了对正则表达式的支持，这里使用正则表达式，将经过预处理的 Scheme 代码进行分词，转化为字符串流。</p>
+<p>以下为解释器使用的正则文法：</p>
+<blockquote>
+<pre><code>(?P&lt;blank&gt;     \s+)|                        # blank characters
+(?P&lt;comment&gt;   ;.*)|                        # comment
+(?P&lt;separator&gt; [\(\)\[\]\{\}\|]|\#\()|      # separator  ( ) [ ] { } | #(
+(?P&lt;bool&gt;      \#t|\#f)|                    # boolean
+(?P&lt;char&gt;      \#\\(?:space|newline|\S))|   # char  #\a #\Z #\space #\newline
+(?P&lt;string&gt;&quot;   (?:\\\\|\\\&quot;|[^&quot;\\])*&quot;)|     # string
+(?P&lt;number&gt;    [+-]?\d*\.?\d+)|             # number
+(?P&lt;symbol&gt;    [\w!$%&amp;*+-./:&lt;=&gt;?@^_~]+)|    # symbol
+(?:            .+)                          # invalid pattern
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>符号流</p>
+<p>分词的结果是一个字符串流，之后需要将每个字符串转化为一个对应类型的 Token。</p>
+<p>判断字符串类型的方法，通常是根据开头的一个或几个字符，这个逻辑可以根据上面的正则表达式方便地提取。</p>
+</li>
+<li>
+<p>语法树</p>
+<p>Scheme 使用一对括号对语句进行界定，因此可以在词法分析阶段，构造括号嵌套的树状结构，树的每个节点是一个符号或一棵子树。</p>
+</li>
+</ol>
+<p>词法分析过程示例：</p>
+<blockquote>
+<pre><code>   (+ 1 (if #t x .2)) &quot;string&quot;  
+
+=&gt; ['(', ' ', '+', ' ', '1', '(', 'if', ' ', '#t', ' ', 'x', ' ', '.2', ')', ')', ' ', '&quot;string&quot;']  
+
+=&gt; ['(', Symbol('+'), 1, '(', Symbol('if'), True, Symbol('x'), 0.2, ')', ')', 'string'']  
+
+=&gt; [Symbol('begin'),   
+      [Symbol('+'), 1,   
+         [Symbol('if'), True, Symbol('x'), 1.2]],  
+      'string']
+</code></pre>
+
+</blockquote>
+<h3>4.4 语法分析</h3>
+<p>语法分析需要维护一个局部变量表栈(栈顶为在当前过程定义的局部变量)，一个中间代码表，一个全局常量表。其中中间代码表和全局常量表需要交给执行模块进行解释执行。</p>
+<p>语法分析为递归地解析语法树的每个节点，当节点不是叶结点时，根据其第一个子节点的类型分别处理。</p>
+<ol>
+<li>
+<p><code>generate</code> 函数<br />
+   语法分析的入口，以及每次递归调用的入口函数。
+   解析语法树的一个节点，根据节点的类型，分别调用以下函数中的一个。  
+</p>
+<ul>
+<li>当节点是一个元素时，调用 <code>gen_atom</code> 函数，生成形如 <code>push %var</code> 的中间代码；  
+</li>
+<li>当节点是一个表时，如果第一个元素是 <code>define</code>, <code>lambda</code>, <code>if</code>, <code>quote</code> 中的一个，则分别调用对应的函数；  
+</li>
+<li>当节点时一个表，且第一个元素不是以上 symbol 时，调用 <code>gen_proc</code>函数。</li>
+</ul>
+</li>
+<li>
+<p><code>(%proc %args ...)</code><br />
+生成形如 <code>push %proc; push %arg-n; ...; push %arg-0; call/tcal n</code> 的中间代码，参数传递采用从后向前依次压栈。</p>
+<p>有些情况需要特殊处理：</p>
+<ul>
+<li>
+<p><code>(begin %exp1 %exp2 ...)</code> =&gt; <code>push %exp1; pop null; push %exp2; ...</code><br />
+即除了最后一个过程的过程的返回值需要显示弹出。</p>
+</li>
+<li>
+<p><code>(call/cc %proc)</code> =&gt; <code>push special cc; push %proc; call/tcal 1</code><br />
+<code>call/cc</code> 过程意为以 <code>current-continuation</code> 为参数调用 <code>%proc</code> 过程，这里在转化为中间代码时还原了本意。<code>continuation</code> 和 <code>call/cc</code> 的含义见解释执行模块或 scheme 文档。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>(define %var %value)</code><br />
+   生成形如 <code>push %value; pop %var; push %null</code> 的中间代码，并将 <code>%var</code> 加入当前局部变量表栈顶。<br />
+   其中 push 和 pop 联合使用完成赋值，最后的 <code>push null</code> 作为该过程的返回值</p>
+<blockquote>
+<pre><code>(define f 1)  
+
+push imm   1  
+pop  local (0, 0)  
+push null  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>(lambda (%args ...) %procs ...)</code><br />
+   生成一个匿名过程，该过程被加入全局常量表中，该匿名过程的中间代码通过 <code>(begin %procs ...)</code> 生成。</p>
+<blockquote>
+<pre><code>(lambda (x y) (+ x y))
+
+alloc 2  
+popn  2  
+push  local (0, 1)  // push y  
+push  local (0, 0)  // push x  
+ncal  +     2  
+ret  
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>(if %cond %true-exps %false-exps)</code><br />
+   生成形如 <code>push %cond; jump false %off1; %true-exps; jump always %off2; %false-exps</code> 的中间代码，其中 <code>%off1</code> 和 <code>%off2</code> 在递归调用 <code>generate</code> 函数时由父函数完成填充。</p>
+<blockquote>
+<pre><code>(if (+ 1 2) (+ 3 4) (+ 5 6))  
+
+push imm    2  
+push imm    1  
+ncal +      2  
+jump false  4  // goto false-block
+// true-block  
+push imm    4  
+push imm    3  
+ncal +      2  
+jump always 3  // goto end
+// false-block
+push imm    6  
+push imm    5  
+ncal +      2  
+// end         
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><code>(quote %symbol)</code><br />
+   将 <code>%symbol</code> 视为一个常量，加入全局常量表中，生成形如 <code>push %symbol</code> 的中间代码。</p>
+<blockquote>
+<pre><code>(quote (a b))  
+
+global-table = [global-lambda, '(a b)]
+
+push global 1  // push '(a b)  
+</code></pre>
+
+</blockquote>
+</li>
+</ol>
+<hr />
+<h2>5. 解释执行 (by wky)</h2>
+<h3>5.1 数据结构</h3>
+<ol>
+<li>
+<p>启动代码：Global.bytecode_list</p>
+</li>
+<li>
+<p>常量表：
+   抽象过程 procedure：字节码序列，标号，父过程
+   常量数据：字符串，Pair</p>
+</li>
+<li>
+<p>运行栈：传递参数和返回值</p>
+</li>
+<li>
+<p>continuation:  
+</p>
+<p>有四种状态：  
+</p>
+<ul>
+<li>处于胚胎状态的（被调用时附加调用链，进入运行状态）</li>
+<li>处于运行状态的</li>
+<li>处于即将被捕获状态的（<code>push cc</code>得到）</li>
+<li>处于已经被捕获状态的（<code>call/cc</code>中函数的 <code>popn</code> 时刻，浅拷贝栈顶的 <code>continuation</code>）</li>
+</ul>
+<p>其中保存的数据：  
+</p>
+<ul>
+<li>对应的 procedure  
+</li>
+<li>当前 pc  
+</li>
+<li>返回地址 pc  
+</li>
+<li>局部变量  
+</li>
+<li>调用链  
+</li>
+<li>引用链  
+</li>
+</ul>
+</li>
+</ol>
+<h3>5.2 基本的函数调用</h3>
+<blockquote>
+<pre><code>(define (f x) ...)
+(f 2)
+
+push global f
+pop  local  (0, 0)
+push imm    2
+push local  (0, 0)
+call 1
+</code></pre>
+
+</blockquote>
+<ol>
+<li><code>push global f</code>     ： 用 <code>f</code> 对应的 <code>Procedue</code> 填充一个新的胚胎状态 <code>continuation</code>  
+</li>
+<li><code>pop  local  (0, 0)</code>： 将栈顶的 <code>continuation</code> 绑定到局部变量 0 上  
+</li>
+<li><code>push imm    2</code>  
+</li>
+<li><code>push local  (0, 0)</code>： 在栈顶上创建一个对局部变量 0 的拷贝  
+</li>
+<li><code>call 1</code>            ： 函数调用，具体行为见下面描述  
+</li>
+</ol>
+<h3>5.3 高阶函数</h3>
+<p><strong>5.3.1. 以函数为参数</strong></p>
+<blockquote>
+<pre><code>(define (f g x)
+  (+ (g x) (g x)))
+(f (lambda (x) (* x x)) 10))
+
+[lambda global]
+push global f
+pop  local  (0, 0)
+push imm    10
+push global lambda0
+push local  (0, 0)
+
+[lambda f]
+alloc 2
+popn 2
+push local 0,0(x)
+push local 0,1(g)
+call 1
+push local 0,0(x)
+push local 0,1(g)
+call 1
+ncal +  2
+</code></pre>
+
+</blockquote>
+<p>可见， <code>f</code> 中会多次操作 <code>g</code> ，所以 <code>g</code> 在 <code>f</code> 中必须作为胚胎的 <code>continuation</code> 存在</p>
+<p><strong>5.3.2. 以函数为返回值</strong></p>
+<p><code>(define (f x) ((define (g y) (+ x y)) g))</code><br />
+如何从 <code>f</code> 里面抛出 <code>g</code> ，并保存 <code>f</code> 的局部变量？
+ <code>g</code> 在 <code>f</code> 的 <code>continuation</code> 中（<code>local_vars</code> 中），是一个胚胎的 <code>continuation</code> ，引用链指向 <code>f</code> （具体做法的 <code>push global *</code>）
+抛出就是将 <code>g</code> 的胚胎 <code>continuation</code> 的引用写在栈顶，由于有引用链的存在， <code>f</code> 的 <code>continuation</code> 不会被 GC 。
+<code>g</code> 中对 <code>x</code> 的引用是通过 <code>push local (1,0)</code> 做到的，即沿着引用链向前1次</p>
+<p>为了实现第一等函数，我们使用了胚胎状态的 <code>continuation</code></p>
+<h3>5.4 call/cc如何发生</h3>
+<p><strong>5.4.1. 以 continuation 为参数</strong></p>
+<blockquote>
+<pre><code>(+ 1 (call/cc (lambda(cc) (...))))
+
+push 1
+push cc
+push global lambda0
+call 1
+ncal + 2
+</code></pre>
+
+</blockquote>
+<p>这里 <code>push cc</code> 的时候，栈上已经有元素了，所以 <code>cc.stack</code> 要做 <code>stack</code> 的浅拷贝
+ <code>call</code> 进入 <code>lambda</code> 后，有 <code>popn 1</code> 的操作，这时的 <code>cc</code> 是 <code>lambda</code> 的 <code>continuation</code>，而栈顶的是 <code>cc.prev_cont</code>，
+稍后还会返回到 <code>cc.prev_cont.cur_pc</code> (从 <code>lambda</code> 或者从后面的 <code>(cc 2)</code> )</p>
+<p><strong>5.4.2. 调用一个被捕获的 continuation</strong></p>
+<blockquote>
+<pre><code>(cc 2)
+
+push 2
+push local cc
+call/tcal 1
+</code></pre>
+
+</blockquote>
+<p>当 <code>call</code> 一个被捕获的 <code>continuation</code> 时，直接抛弃当前的 <code>cc</code>，替换成栈顶的一个浅拷贝（拷贝是为了能够多次 <code>call</code> 同一个）
+然后抛弃栈，替换为 <code>cc.stack</code>（这里的 <code>cc</code> 是已经替换过的），然后<code>cc.stack=None</code>，让当前 <code>cc</code> 进入运行状态
+替换之后的 <code>cc</code> 里面存的 <code>cur_pc</code> 的位置是下面例子中第二个 <code>call 1</code> 的后面，恢复的栈的是<code>push cc</code> 之前的栈</p>
+<p><strong>5.4.3. 另一个例子</strong></p>
+<blockquote>
+<pre><code>(call/cc (f x))
+push cc &lt;------这这时复制栈，是正确的
+push x  &lt;------ push cc的时候，cur_pc在这里
+push F  &lt;------这里Push到栈上的不应该被保存
+call 1
+call 1
+...     &lt;------ 其实我们希望cc被恢复的时候，返回到这个地方（cur_pc）
+                只有进入了(f x)返回的函数里面，才会走到这里，所以 popn 的时候才作浅拷贝
+</code></pre>
+
+</blockquote>
+<p><strong>5.4.4 具体做法</strong></p>
+<ol>
+<li>
+<p><code>push global *(procedure)</code> 时：<br />
+需要将抽象过程转化为拥有引用链的具象过程（胚胎状态）。<br />
+从 <code>cc</code> 起，沿着引用链向上观察各 <code>continuation</code>，直到其过程与父过程对应，这时的 <code>continuation</code> 就是该胚胎 <code>continuation</code> 的引用链</p>
+<p><em>为什么在这里把 <code>procedure</code> 换成了 <code>continuation</code> ?</em><br />
+因为 <code>procedure</code> 不知道动态的语义范围（没有引用链）。</p>
+</li>
+<li>
+<p><code>push cc</code> 时：<br />
+   对 <code>cc</code> 不做复制，栈顶元素直接指向 <code>cc</code> ，但是 <code>cc.stack</code> 赋值为 <code>stack</code> 的浅拷贝。</p>
+</li>
+<li>
+<p><code>call</code> 的时候：  
+</p>
+<ul>
+<li>
+<p>如果栈顶是胚胎状态的 <code>continuation</code> ，即函数调用：<br />
+浅拷贝栈顶，接上调用链，成为新的 <code>cc</code> ，记录当前地址为返回地址，更新字节码序列，记录参数个数（类似于胚胎干细胞的分裂+分化）。  
+</p>
+<p><em>这里为什么要浅拷贝（分裂）而不是直接用（分化）？</em><br />
+胚胎干细胞以后还要用，所以先分裂（分化之后就不能分裂了）</p>
+</li>
+<li>
+<p>如果栈顶是已经被捕获状态的 <code>continuation</code> ：  
+</p>
+<ul>
+<li>取出栈顶的参数，将当前栈直接替换为被调用的 <code>continuation</code> 所保存的 <code>stack</code> 的浅拷贝，最后在新的栈上放回参数。  
+</li>
+<li>而 <code>cc</code> 直接替换为被调用的 <code>continuation</code> 的浅拷贝，并不再处于&quot;已经被捕获状态&quot;，而是运行状态。</li>
+<li>恢复字节码序列和 <code>pc</code> 。</li>
+</ul>
+<p><em>为什么是被调用的 <code>continuation</code> 所保存的 <code>stack</code> 的浅拷贝？</em><br />
+因为，这个 <code>continuation</code> 还有可能再一次被调用，为了保存栈，所以要浅拷贝。  
+</p>
+<p><em>为什么不是深拷贝？</em><br />
+深拷贝可能会递归的拷贝，一般而言我们的运行时数据结构有很多环。
+另外，具体的数据还是要变的：  
+</p>
+<blockquote>
+<p>(define x 0)<br />
+  (define c 0)<br />
+  (display (call/cc (lambda (cc) (set! c cc))))<br />
+  (set! x (+ x 1))<br />
+  (c x)  
+</p>
+</blockquote>
+<p>如果深拷贝，那每次打出来的 <code>x</code> 都是 <code>0</code> 。
+实际情况是打印 <code>0，1，2，3，4，5</code> 。</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>tcal</code> 的时候：</p>
+<ul>
+<li>如果栈顶是胚胎状态的 <code>continuation</code> ，即函数调用：<br />
+  胚胎干细胞先分裂，然后分化的时候，调用链接的是 <code>cc</code> 的上一个，返回地址写成 <code>cc</code> 的返回地址。
+  其他工作于 <code>call</code> 相同</li>
+<li>
+<p>如果栈顶是已经被捕获状态的 <code>continuation</code> ：<br />
+  与 <code>call</code> 完全相同。  
+</p>
+<p><em>为什么 <code>tcal</code> 没有不同？</em><br />
+因为调用一个捕获了的 <code>continuation</code> 就是抛弃当前的状态</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>popn 1</code> 而且栈顶是捕获的 <code>continuation</code> 时：<br />
+  这时就是 <code>call/cc</code> 中的函数被调用的时刻, 栈顶是 <code>cc-&gt;prev_cont</code> （即调用链的上一个）。<br />
+  为了保存状态，需要用栈顶的浅拷贝替换栈顶（随后被 <code>pop</code> 进入局部变量，成为已经被捕获状态）。<br />
+  代码中还有 <code>stack[-1].stack = None</code> 是标记栈顶 <code>continuation</code> 不再处于&quot;即将被捕获状态&quot;，恢复为运行状态。  
+</p>
+</li>
+</ol>
+<p><strong><em>附：浅拷贝是什么？</em></strong></p>
+<p>设有 <code>A</code> 类的实例 <code>a {x, y, z}</code> ， <code>x, y, z</code> 分别指向其他对象。<br />
+做 <code>a</code> 的浅拷贝 <code>b</code> ，则 <code>b{x, y, z}</code> 中的 <code>x, y, z</code> 也指向 <code>a{x, y, z}</code> 指向的对象。<br />
+但是当修改 <code>b.x</code> 为另一对象时，<code>a.x</code> 仍指向原来的对象</p>
+
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->
